@@ -17,29 +17,29 @@ exports.handler = (event, context, callback) => {
   console.log("Response status code :%s", response.status);
 
   //check if image is not present
-  if (response.status == 404) {
+  if (response.status == 404 || response.status == 403) {
 
     let request = event.Records[0].cf.request;
-    let params = querystring.parse(request.querystring);
+    // let params = querystring.parse(request.querystring);
 
     // if there is no dimension attribute, just pass the response
-    if (!params.d) {
-      callback(null, response);
-      return;
-    }
+    // if (!params.d) {
+    //   callback(null, response);
+    //   return;
+    // }
 
     // read the dimension parameter value = width x height and split it by 'x'
-    let dimensionMatch = params.d.split("x");
+    // let dimensionMatch = params.d.split("x");
 
-    // read the required path. Ex: uri /images/100x100/webp/image.jpg
+    // read the required path. Ex: uri /resized/100x100/webp/image.jpg
     let path = request.uri;
 
     // read the S3 key from the path variable.
-    // Ex: path variable /images/100x100/webp/image.jpg
+    // Ex: path variable /resized/100x100/webp/image.jpg
     let key = path.substring(1);
 
     // parse the prefix, width, height and image name
-    // Ex: key=images/200x200/webp/image.jpg
+    // Ex: key=resized/200x200/webp/image.jpg
     let prefix, originalKey, match, width, height, requiredFormat, imageName;
     let startIndex;
 
@@ -52,7 +52,7 @@ exports.handler = (event, context, callback) => {
       // correction for jpg required for 'Sharp'
       requiredFormat = match[4] == "jpg" ? "jpeg" : match[4];
       imageName = match[5];
-      originalKey = prefix + "/" + imageName;
+      originalKey = imageName;
     }
     catch (err) {
       // no prefix exist for image..
@@ -66,13 +66,14 @@ exports.handler = (event, context, callback) => {
       imageName = match[4];
       originalKey = imageName;
     }
-
     // get the source image file
     S3.getObject({ Bucket: BUCKET, Key: originalKey }).promise()
       // perform the resize operation
       .then(data => Sharp(data.Body)
         .resize(width, height)
-        .toFormat(requiredFormat)
+        .webp({
+          quality: 50,
+        })
         .toBuffer()
       )
       .then(buffer => {
@@ -80,7 +81,7 @@ exports.handler = (event, context, callback) => {
         S3.putObject({
             Body: buffer,
             Bucket: BUCKET,
-            ContentType: 'image/' + requiredFormat,
+            ContentType: 'image/webp',
             CacheControl: 'max-age=31536000',
             Key: key,
             StorageClass: 'STANDARD'
@@ -93,7 +94,7 @@ exports.handler = (event, context, callback) => {
         response.status = 200;
         response.body = buffer.toString('base64');
         response.bodyEncoding = 'base64';
-        response.headers['content-type'] = [{ key: 'Content-Type', value: 'image/' + requiredFormat }];
+        response.headers['content-type'] = [{ key: 'Content-Type', value: 'image/webp' }];
         callback(null, response);
       })
     .catch( err => {

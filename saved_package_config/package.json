@@ -1,29 +1,17 @@
 {
-  "name": "origin-response-function",
+  "name": "build",
   "version": "1.0.0",
-  "description": "Origin response function implementation",
   "main": "index.js",
-  "config": {
-    "profile": "default",
-    "region": "us-east-1",
-    "memory": "1536",
-    "timeout": "5",
-    "name": "",
-    "role": ""
-  },
-  "scripts": {
-    "deploy": "claudia create --profile $npm_package_config_profile $([ \"$npm_package_config_role\" != '' ] && echo \"--role $npm_package_config_role\" || echo \"\") $([ \"$npm_package_config_name\" != '' ] && echo \"--name $npm_package_config_name\" || echo \"\") --region $npm_package_config_region --version production --handler index.handler --no-optional-dependencies --timeout $npm_package_config_timeout --memory $npm_package_config_memory --policies ../policies/*.json",
-    "set-cloudfront-trigger": "claudia set-cloudfront-trigger --distribution-id EH9BAUFTQ2UHR --event-types origin-response --version production",
-    "update": "claudia update --profile $npm_package_config_profile --memory $npm_package_config_memory --version production --runtime nodejs8.10 --no-optional-dependencies"
-  },
   "dependencies": {
-    "aws-sdk": "^2.433.0",
-    "querystring": "^0.2.0",
-    "sharp": "^0.22.0"
+    "claudia": "^5.4.2",
+    "querystring": "^0.2.0"
   },
-  "devDependencies": {
-    "claudia": "^5.4.2"
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "miya9022",
-  "license": "MIT"
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
 }

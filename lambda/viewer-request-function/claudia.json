@@ -1,0 +1,7 @@
+{
+  "lambda": {
+    "role": "viewer-request-function-executor",
+    "name": "viewer-request-function",
+    "region": "us-east-1"
+  }
+}
