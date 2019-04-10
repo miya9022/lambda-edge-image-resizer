@@ -50,7 +50,7 @@ exports.handler = (event, context, callback) => {
       height = parseInt(match[3], 10);
 
       // correction for jpg required for 'Sharp'
-      requiredFormat = match[4] == "jpg" ? "jpeg" : match[4];
+      requiredFormat = match[4];
       imageName = match[5];
       originalKey = imageName;
     }
@@ -62,7 +62,7 @@ exports.handler = (event, context, callback) => {
       height = parseInt(match[2], 10);
 
       // correction for jpg required for 'Sharp'
-      requiredFormat = match[3] == "jpg" ? "jpeg" : match[3]; 
+      requiredFormat = match[3]; 
       imageName = match[4];
       originalKey = imageName;
     }
@@ -77,6 +77,7 @@ exports.handler = (event, context, callback) => {
         .toBuffer()
       )
       .then(buffer => {
+        key = key.replace(new RegExp(requiredFormat, 'g'), 'webp');
         // save the resized object to S3 bucket with appropriate object key.
         S3.putObject({
             Body: buffer,
